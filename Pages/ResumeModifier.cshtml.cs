@@ -48,7 +48,7 @@ public List<ATSPlacementSuggestion> PlacementSuggestions { get; set; } = new();
 
 public AIResumeAnalyzer.TailoredResumeResult? TailoredResume { get; set; }
 
-public string Message { get; set; } = string.Empty;
+public string Message { get; set; } = string.Empty; 
 public bool IsSuccess { get; set; }
 
 public ResumeModifierModel(
