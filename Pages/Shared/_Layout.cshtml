@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ATSklar</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ATSklar.styles.css" asp-append-version="true" />
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+            margin-bottom: 0;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+            border: none !important;
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .navbar-brand:before {
+            content: '📄';
+            font-size: 1.75rem;
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.5rem 1rem !important;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: #d1d5db;
+            border-top: none;
+            margin-top: 3rem;
+            padding: 2rem 0;
+        }
+
+        footer a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #93c5fd;
+        }
+
+        main {
+            padding-bottom: 0 !important;
+        }
+
+        .navbar-toggler {
+            border: 2px solid white;
+            border-radius: 8px;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='white' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm">
+            <div class="container-lg">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">ATSklar</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/Index">
+                                <i class="fas fa-home"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/ResumeModifier">
+                                <i class="fas fa-file-check"></i> Resume Optimizer
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-page="/Privacy">
+                                <i class="fas fa-lock"></i> Privacy
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div class="container-lg">
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h6 style="color: white; margin-bottom: 1rem;"><i class="fas fa-file-check"></i> ATSklar</h6>
+                    <p>AI-Powered ATS Resume Optimizer. Get your resume ready for applicant tracking systems.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p style="margin-bottom: 0;">
+                        <i class="fas fa-copyright"></i> 2026 - ATSklar
+                        <br>
+                        <a asp-area="" asp-page="/Privacy"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+                    </p>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
+            <p style="text-align: center; margin: 0; font-size: 0.9rem;">
+                Made with <i class="fas fa-heart" style="color: #ef4444;"></i> for better resumes
+            </p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

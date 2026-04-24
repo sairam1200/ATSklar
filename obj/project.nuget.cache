@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "dgSpecHash": "RipEyh4aMZ0=",
+  "success": true,
+  "projectFilePath": "E:\\ATSklar\\ATSklar.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\saira\\.nuget\\packages\\documentformat.openxml\\3.0.0\\documentformat.openxml.3.0.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\documentformat.openxml.framework\\3.0.0\\documentformat.openxml.framework.3.0.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\itext\\9.0.0\\itext.9.0.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\itext.commons\\9.0.0\\itext.commons.9.0.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\itext7\\9.0.0\\itext7.9.0.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\microsoft.dotnet.platformabstractions\\1.1.0\\microsoft.dotnet.platformabstractions.1.1.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\microsoft.extensions.dependencymodel\\1.1.0\\microsoft.extensions.dependencymodel.1.1.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\system.io.packaging\\8.0.0\\system.io.packaging.8.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "ATSklar depends on DocumentFormat.OpenXml (>= 2.21.1) but DocumentFormat.OpenXml 2.21.1 was not found. DocumentFormat.OpenXml 3.0.0 was resolved instead.",
+      "projectPath": "E:\\ATSklar\\ATSklar.csproj",
+      "warningLevel": 1,
+      "filePath": "E:\\ATSklar\\ATSklar.csproj",
+      "libraryId": "DocumentFormat.OpenXml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "ATSklar depends on itext7 (>= 8.1.6) but itext7 8.1.6 was not found. itext7 9.0.0 was resolved instead.",
+      "projectPath": "E:\\ATSklar\\ATSklar.csproj",
+      "warningLevel": 1,
+      "filePath": "E:\\ATSklar\\ATSklar.csproj",
+      "libraryId": "itext7",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.IO.Packaging' 8.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-f32c-w444-8ppv",
+      "projectPath": "E:\\ATSklar\\ATSklar.csproj",
+      "warningLevel": 1,
+      "filePath": "E:\\ATSklar\\ATSklar.csproj",
+      "libraryId": "System.IO.Packaging",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.IO.Packaging' 8.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-qj66-m88j-hmgj",
+      "projectPath": "E:\\ATSklar\\ATSklar.csproj",
+      "warningLevel": 1,
+      "filePath": "E:\\ATSklar\\ATSklar.csproj",
+      "libraryId": "System.IO.Packaging",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
+}
