@@ -1,845 +1,349 @@
 @page "{mode?}"
 @model ResumeModifierModel
 @{
-    ViewData["Title"] = "ATS Resume Optimizer";
-    var isFocusedMode = string.Equals(Model.Mode, "focused", StringComparison.OrdinalIgnoreCase);
-}
-
-@functions {
-    private string ScoreTone(int score) => score switch
-    {
-        >= 85 => "score-strong",
-        >= 65 => "score-good",
-        >= 45 => "score-watch",
-        _ => "score-risk"
-    };
-
-    private string StepStatusTone(string status) => status switch
-    {
-        "Great" => "step-status step-status-great",
-        "Watch" => "step-status step-status-watch",
-        "Risk" => "step-status step-status-risk",
-        _ => "step-status step-status-watch"
-    };
+    ViewData["Title"] = "ATS Optimizer";
+    // Determine step based on state
+    int step = 1;
+    if (Model.JobAnalyzed) step = 3;
+    else if (Model.ResumeAnalyzed) step = 2;
 }
 
 <style>
     :root {
-        --ink: #132238;
-        --muted: #5b6b80;
-        --line: #d9e1ea;
-        --surface: rgba(255,255,255,0.84);
-        --white: #ffffff;
-        --brand: #0f766e;
-        --brand-dark: #115e59;
-        --accent: #f97316;
-        --good: #15803d;
-        --warn: #c2410c;
-        --bad: #b91c1c;
+        --primary: #0284c7;
+        --primary-dark: #0369a1;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
     }
 
     body {
-        background:
-            radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 28%),
-            radial-gradient(circle at top right, rgba(249, 115, 22, 0.13), transparent 22%),
-            linear-gradient(180deg, #ecf4f3 0%, #f6f2ec 50%, #fbfaf7 100%);
-        color: var(--ink);
-        font-family: Georgia, Cambria, "Times New Roman", serif;
+        background-color: var(--bg);
+        color: var(--text-main);
+        font-family: 'Inter', -apple-system, sans-serif;
+        line-height: 1.5;
     }
 
-    .resume-shell {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 1.25rem 1rem 3rem;
+    .app-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
     }
 
-    .hero,
-    .stats-grid,
-    .dual-grid,
-    .form-grid {
-        display: grid;
-        gap: 1rem;
-    }
-
-    .hero {
-        grid-template-columns: 1fr;
-        margin-bottom: .75rem;
-    }
-
-    .stats-grid,
-    .dual-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .form-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .wide {
-        grid-column: 1 / -1;
-    }
-
-    .glass,
-    .panel {
-        background: transparent;
-        border: 0;
-        box-shadow: none;
-        backdrop-filter: none;
-        border-radius: 0;
-    }
-
-    .hero-copy,
-    .panel {
-        padding: 0;
-    }
-
-    .hero-copy h1 {
-        margin: .45rem 0 .35rem;
-        font-size: clamp(1.8rem, 3.6vw, 2.8rem);
-        line-height: 1.02;
-        letter-spacing: -.04em;
-    }
-
-    .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: .45rem;
-        padding: .45rem .85rem;
-        border-radius: 999px;
-        background: rgba(15,118,110,.12);
-        color: var(--brand-dark);
-        font: 700 .84rem/1 "Segoe UI", sans-serif;
-        letter-spacing: .06em;
-        text-transform: uppercase;
-    }
-
-    .body-copy,
-    .panel li {
-        color: var(--muted);
-        font: 500 .96rem/1.65 "Segoe UI", sans-serif;
-    }
-
-    .chip-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: .7rem;
-        margin-top: .6rem;
-    }
-
-    .chip,
-    .keyword-chip {
-        display: inline-flex;
-        align-items: center;
-        padding: .55rem .88rem;
-        border-radius: 999px;
-        background: var(--white);
-        border: 1px solid rgba(19,34,56,.08);
-        font: 700 .88rem/1 "Segoe UI", sans-serif;
-    }
-
-    .panel-head {
+    /* Stepper UI */
+    .stepper {
         display: flex;
         justify-content: space-between;
-        align-items: start;
-        gap: 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 3rem;
+        position: relative;
     }
 
-    .panel-head h2,
-    .card-title {
-        margin: 0;
-        font-size: 1.3rem;
+    .stepper::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border);
+        z-index: 1;
     }
 
-    label {
-        display: block;
-        margin-bottom: .45rem;
-        color: var(--ink);
-        font: 700 .84rem/1.2 "Segoe UI", sans-serif;
-        letter-spacing: .05em;
-        text-transform: uppercase;
+    .step-item {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        flex: 1;
     }
 
-    input[type="text"],
-    input[type="file"],
-    textarea {
-        width: 100%;
-        border-radius: 18px;
-        border: 1px solid var(--line);
-        background: rgba(255,255,255,.92);
-        padding: .95rem 1rem;
-        color: var(--ink);
-        font: 500 .98rem/1.45 "Segoe UI", sans-serif;
-    }
-
-    textarea {
-        min-height: 160px;
-        resize: vertical;
-    }
-
-    .upload-box,
-    .info-card,
-    .preview-box {
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        padding: 0;
-    }
-
-    .upload-box {
-        background: transparent;
-        max-width: 520px;
-    }
-
-    .upload-compact {
-        display: grid;
-        gap: .55rem;
-        max-width: 520px;
-    }
-
-    .button-row {
+    .step-dot {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--card);
+        border: 2px solid var(--border);
         display: flex;
-        flex-wrap: wrap;
-        gap: .75rem;
-        margin-top: .7rem;
-    }
-
-    .btn-main,
-    .btn-soft {
-        border: none;
-        border-radius: 999px;
-        padding: .9rem 1.3rem;
-        font: 700 .94rem/1 "Segoe UI", sans-serif;
-        display: inline-flex;
         align-items: center;
         justify-content: center;
-        text-decoration: none;
+        margin: 0 auto 0.5rem;
+        font-weight: bold;
+        transition: 0.3s;
     }
 
-    .btn-main {
+    .step-item.active .step-dot {
+        border-color: var(--primary);
+        background: var(--primary);
         color: white;
-        background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
-        box-shadow: 0 14px 28px rgba(17,94,89,.22);
     }
 
-    .btn-soft {
-        color: var(--ink);
-        background: white;
-        border: 1px solid var(--line);
+    .step-item.completed .step-dot {
+        background: var(--success);
+        border-color: var(--success);
+        color: white;
     }
 
-    .metric strong {
+    .step-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .active .step-label { color: var(--primary); }
+
+    /* Cards & Layout */
+    .glass-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Score Gauge */
+    .score-badge {
+        font-size: 3rem;
+        font-weight: 800;
+        text-align: center;
         display: block;
-        margin-bottom: .35rem;
-        font-size: 2rem;
-        line-height: 1;
     }
 
-    .score-strong strong { color: var(--good); }
-    .score-good strong { color: var(--brand); }
-    .score-watch strong { color: var(--warn); }
-    .score-risk strong { color: var(--bad); }
+    .score-low { color: var(--danger); }
+    .score-mid { color: var(--warning); }
+    .score-high { color: var(--success); }
 
-    .preview-box {
+    /* Form Elements */
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    input, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .keyword-pill {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #f1f5f9;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        margin: 0.25rem;
+        border: 1px solid var(--border);
+    }
+
+    .preview-area {
+        background: #fdfdfd;
+        border: 1px solid var(--border);
+        padding: 2rem;
+        font-family: 'Courier New', Courier, monospace;
         white-space: pre-wrap;
-        max-height: 700px;
-        overflow: auto;
-        font: 500 .96rem/1.8 "Segoe UI", sans-serif;
-        background: #fffdfa;
-    }
-
-    .notice {
-        border-radius: 12px;
-        padding: .95rem 1rem;
-        margin-bottom: 1rem;
-        font: 700 .92rem/1.5 "Segoe UI", sans-serif;
-    }
-
-    .notice-ok {
-        background: rgba(21,128,61,.12);
-        color: #166534;
-    }
-
-    .notice-bad {
-        background: rgba(185,28,28,.12);
-        color: #991b1b;
-    }
-
-    .mode-banner {
-        margin-top: .6rem;
-        padding: 0;
-        border-radius: 0;
-        background: transparent;
-        border: 0;
-    }
-
-    .mode-banner strong {
-        display: block;
-        margin-bottom: .35rem;
-        font: 700 .92rem/1.4 "Segoe UI", sans-serif;
-    }
-
-    .suggestion-list {
-        display: grid;
-        gap: .85rem;
-    }
-
-    .suggestion-card {
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        padding: .35rem 0;
-        border-bottom: 1px solid rgba(19,34,56,.08);
-    }
-
-    .suggestion-card strong,
-    .suggestion-card .live-location {
-        display: block;
-    }
-
-    .live-location {
-        margin: .35rem 0 .5rem;
-        color: var(--brand-dark);
-        font: 700 .82rem/1.4 "Segoe UI", sans-serif;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-    }
-
-    .suggestion-card p {
-        margin: 0 0 .55rem;
-    }
-
-    .subtle-note {
-        margin-top: .45rem;
-        color: var(--muted);
-        font: 500 .9rem/1.6 "Segoe UI", sans-serif;
-    }
-
-    .step-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1rem;
-    }
-
-    .guide-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .guide-card {
-        padding: .9rem 1rem;
-        border-radius: 18px;
-        background: rgba(255,255,255,.55);
-        border: 1px solid rgba(19,34,56,.08);
-    }
-
-    .guide-card h2 {
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-        margin-bottom: .75rem;
-    }
-
-    .guide-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1.8rem;
-        height: 1.8rem;
-        border-radius: 999px;
-        background: rgba(15,118,110,.12);
-        color: var(--brand-dark);
-        font: 700 .9rem/1 "Segoe UI", sans-serif;
-    }
-
-    .flow-list,
-    .outcome-list {
-        display: grid;
-        gap: .7rem;
-    }
-
-    .flow-item,
-    .outcome-item {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: .7rem;
-        align-items: start;
-    }
-
-    .flow-badge {
-        width: 1.8rem;
-        height: 1.8rem;
-        border-radius: 999px;
-        background: rgba(20,33,61,.08);
-        color: var(--ink);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font: 700 .82rem/1 "Segoe UI", sans-serif;
-    }
-
-    .outcome-dot {
-        width: .9rem;
-        height: .9rem;
-        border-radius: 999px;
-        margin-top: .35rem;
-    }
-
-    .outcome-dot-great {
-        background: #15803d;
-    }
-
-    .outcome-dot-watch {
-        background: #c2410c;
-    }
-
-    .outcome-dot-risk {
-        background: #b91c1c;
-    }
-
-    .step-card {
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        padding: .5rem 0;
-        border-bottom: 1px solid rgba(19,34,56,.08);
-    }
-
-    .step-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: .55rem;
-    }
-
-    .step-status {
-        padding: .35rem .65rem;
-        border-radius: 999px;
-        font: 700 .78rem/1 "Segoe UI", sans-serif;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-    }
-
-    .step-status-great {
-        background: rgba(21,128,61,.12);
-        color: #166534;
-    }
-
-    .step-status-watch {
-        background: rgba(194,65,12,.12);
-        color: #9a3412;
-    }
-
-    .step-status-risk {
-        background: rgba(185,28,28,.12);
-        color: #991b1b;
-    }
-
-    .repetition-list {
-        display: grid;
-        gap: .75rem;
-    }
-
-    .repetition-item {
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-        padding: .45rem 0;
-        border-bottom: 1px solid rgba(19,34,56,.08);
-    }
-
-    @@media (max-width: 1100px) {
-        .hero,
-        .stats-grid,
-        .dual-grid,
-        .form-grid,
-        .step-grid,
-        .guide-grid {
-            grid-template-columns: 1fr;
-        }
+        max-height: 500px;
+        overflow-y: auto;
     }
 </style>
 
-<div class="resume-shell">
-    <section class="hero">
-        <div class="hero-copy">
-            <span class="eyebrow">Resume Check</span>
-            <div class="mode-banner">
-                <p class="body-copy">
-                    @(isFocusedMode
-                        ? "Targeted check with optional job details."
-                        : "Quick check for ATS readability.")
-                </p>
-            </div>
+<div class="app-container">
+    <!-- 1. Progress Stepper -->
+    <div class="stepper">
+        <div class="step-item @(step >= 1 ? "completed" : "") @(step == 1 ? "active" : "")">
+            <div class="step-dot">1</div>
+            <div class="step-label">Upload</div>
         </div>
-    </section>
+        <div class="step-item @(step >= 2 ? "completed" : "") @(step == 2 ? "active" : "")">
+            <div class="step-dot">2</div>
+            <div class="step-label">Analysis</div>
+        </div>
+        <div class="step-item @(step >= 3 ? "completed" : "") @(step == 3 ? "active" : "")">
+            <div class="step-dot">3</div>
+            <div class="step-label">Optimize</div>
+        </div>
+    </div>
 
-    @if (!string.IsNullOrWhiteSpace(Model.Message))
+    @if (!string.IsNullOrEmpty(Model.Message))
     {
-        <div class="notice @(Model.IsSuccess ? "notice-ok" : "notice-bad")">@Model.Message</div>
+        <div class="glass-card" style="border-left: 4px solid @(Model.IsSuccess ? "var(--success)" : "var(--danger)")">
+            @Model.Message
+        </div>
     }
 
-    <div style="display:grid; gap:1rem;">
-        <main style="display:grid; gap:1rem;">
-            <section class="glass panel">
+   @switch (step)
+    {
+        case 1:
+            <!-- STEP 1: UPLOAD PAGE -->
+            <div class="glass-card text-center" style="max-width: 600px; margin: 0 auto;">
+                <h2>Upload your Resume</h2>
+                <p class="text-muted">Start by uploading your current resume for a baseline ATS scan.</p>
                 
-
-                <form method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data" class="mt-4">
                     <input asp-for="Mode" type="hidden" />
-                    <div class="upload-box upload-compact">
-                        <label asp-for="ResumeFile">Upload file</label>
-                        <input asp-for="ResumeFile" type="file" accept=".pdf,.docx,.txt" />
-                        <div class="body-copy" style="margin-top:.45rem;">PDF, DOCX, TXT up to 10MB.</div>
+                    <div class="form-group">
+                        <input asp-for="ResumeFile" type="file" class="form-control" />
                     </div>
-                    <div class="button-row">
-                        <button class="btn-main" type="submit" name="action" value="analyze">Analyze Resume</button>
-                    </div>
+                    <button type="submit" name="action" value="analyze" class="btn-primary w-100">Analyze Baseline</button>
                 </form>
-            </section>
+            </div>
+            break;
 
-            <section class="panel">
-                <div class="guide-grid">
-                    <div class="guide-card">
-                        <h2><span class="guide-icon">1</span> How It Works</h2>
-                        <div class="flow-list body-copy">
-                            <div class="flow-item">
-                                <span class="flow-badge">1</span>
-                                <div>Upload the resume file.</div>
-                            </div>
-                            <div class="flow-item">
-                                <span class="flow-badge">2</span>
-                                <div>The system reads text, sections, and contact details.</div>
-                            </div>
-                            <div class="flow-item">
-                                <span class="flow-badge">3</span>
-                                <div>It checks formatting, keywords, repetition, and impact.</div>
-                            </div>
-                            <div class="flow-item">
-                                <span class="flow-badge">4</span>
-                                <div>You get step-by-step ATS results and suggestions.</div>
-                            </div>
+        case 2:
+            <!-- STEP 2: ANALYSIS PAGE -->
+            <div class="grid-2">
+                <div class="glass-card">
+                    <h3>ATS Readiness</h3>
+                    <span class="score-badge @(Model.ATSScore > 80 ? "score-high" : Model.ATSScore > 50 ? "score-mid" : "score-low")">
+                        @Model.ATSScore%
+                    </span>
+                    <p class="text-muted text-center">Baseline Score</p>
+                    
+                    <hr />
+                    
+                    <h4>Issues Detected</h4>
+                    <ul class="text-danger">
+                        @if (Model.ATSIssues.Count == 0)
+                        {
+                            <li class="text-success">No major issues found!</li>
+                        }
+                        else
+                        {
+                            @foreach(var issue in Model.ATSIssues)
+                            {
+                                <li><strong>@issue.Issue</strong>: @issue.Recommendation</li>
+                            }
+                        }
+                    </ul>
+                </div>
+
+                <div class="glass-card">
+                    <h3>Target a Job</h3>
+                    <p class="text-muted">Provide job details to customize your resume.</p>
+                    <form method="post">
+                        <input asp-for="Mode" type="hidden" />
+                        <div class="form-group">
+                            <label>Target Company</label>
+                            <input asp-for="CompanyName" placeholder="e.g. Google" required />
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label>Target Role</label>
+                            <input asp-for="TargetRole" placeholder="e.g. Software Engineer" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Job Description (Optional)</label>
+                            <textarea asp-for="JobDescription" rows="5" placeholder="Paste the job description here for better matching..."></textarea>
+                        </div>
+                        <button type="submit" name="action" value="researchOptimize" class="btn-primary w-100">Tailor My Resume</button>
+                    </form>
+                </div>
+            </div>
+            break;
 
-                    <div class="guide-card">
-                        <h2><span class="guide-icon">2</span> Outcomes</h2>
-                        <div class="outcome-list body-copy">
-                            <div class="outcome-item">
-                                <span class="outcome-dot outcome-dot-great"></span>
-                                <div><strong>Great</strong><br />Clear and ATS-friendly.</div>
-                            </div>
-                            <div class="outcome-item">
-                                <span class="outcome-dot outcome-dot-watch"></span>
-                                <div><strong>Watch</strong><br />Readable, but can be improved.</div>
-                            </div>
-                            <div class="outcome-item">
-                                <span class="outcome-dot outcome-dot-risk"></span>
-                                <div><strong>Risk</strong><br />May reduce parsing or matching.</div>
-                            </div>
-                            <div class="outcome-item">
-                                <span class="outcome-dot outcome-dot-great"></span>
-                                <div><strong>Extra</strong><br />Add job details for keyword suggestions.</div>
-                            </div>
+        case 3:
+            <!-- STEP 3: OPTIMIZATION PAGE (FIXED) -->
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Optimization Complete!</h2>
+                    <div class="text-right">
+                        <div class="text-muted" style="font-size:0.8rem">ATS SCORE BOOST</div>
+                        <div style="font-size:1.5rem; font-weight:bold; color:var(--success)">
+                            @Model.ATSScore% → @Model.OptimizedATSScore%
                         </div>
                     </div>
                 </div>
-            </section>
 
-            @if (Model.ResumeAnalyzed)
-            {
-                <section class="glass panel">
-                        <div class="panel-head">
-                            <div>
-                            <h2>2. Add Job Details</h2>
-                            <p class="body-copy">
-                                @(isFocusedMode
-                                    ? "Add the company, role, and job description for job-specific checks."
-                                    : "This is optional, but it helps generate job-specific suggestions.")
-                            </p>
-                        </div>
-                    </div>
-
-                    <form method="post" id="targetingForm">
-                        <input asp-for="Mode" type="hidden" />
-                        <div class="form-grid">
-                            <div>
-                                <label asp-for="CompanyName">Target company</label>
-                                <input asp-for="CompanyName" id="CompanyName" type="text" placeholder="Example: Amazon" />
-                            </div>
-                            <div>
-                                <label asp-for="TargetRole">Target role</label>
-                                <input asp-for="TargetRole" id="TargetRole" type="text" placeholder="Example: Data Analyst" />
-                            </div>
-                            <div class="wide">
-                                <label asp-for="CompanyWebsite">Company website (optional)</label>
-                                <input asp-for="CompanyWebsite" type="text" placeholder="Example: amazon.com or careers page URL" />
-                            </div>
-                            <div class="wide">
-                                <label asp-for="JobDescription">Job description</label>
-                                <textarea asp-for="JobDescription" id="JobDescription" placeholder="Paste the target job description for stronger ATS matching and better rewrite guidance."></textarea>
-                            </div>
-                        </div>
-
-                        <div class="button-row">
-                            <button class="btn-main" type="submit" name="action" value="researchOptimize">Run Job-Specific Check</button>
-                        </div>
-                    </form>
-                </section>
-
-                <section class="glass panel">
-                    <div class="panel-head">
-                        <div>
-                            <h2>Check Summary</h2>
-                            <p class="body-copy">A quick view of the current ATS readiness of the uploaded resume.</p>
-                        </div>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="info-card metric @ScoreTone(Model.ATSScore)">
-                            <strong>@Model.ATSScore</strong>
-                            <div class="body-copy">ATS score</div>
-                        </div>
-                        <div class="info-card metric">
-                            <strong>@Model.KeywordFrequency.Count</strong>
-                            <div class="body-copy">Recognized keywords</div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="glass panel">
-                        <div class="panel-head">
-                            <div>
-                            <h2>Issues And Gaps</h2>
-                            <p class="body-copy">These are the main issues detected in the uploaded resume.</p>
-                        </div>
-                    </div>
-
-                    <div class="dual-grid">
-                        <div class="info-card">
-                            <div class="card-title">ATS Issues</div>
-                            <ul>
-                                @if (Model.ATSIssues.Count == 0)
-                                {
-                                    <li>No major ATS issues detected.</li>
-                                }
-                                else
-                                {
-                                    @foreach (var issue in Model.ATSIssues)
-                                    {
-                                        <li><strong>@issue.Severity:</strong> @issue.Issue. @issue.Recommendation</li>
-                                    }
-                                }
-                            </ul>
-                        </div>
-
-                        <div class="info-card">
-                            <div class="card-title">Suggested Keywords</div>
-                            <div class="chip-row">
-                                @if (Model.MissingKeywords.Count == 0)
-                                {
-                                    <span class="keyword-chip">No large baseline gaps</span>
-                                }
-                                else
-                                {
-                                    @foreach (var keyword in Model.MissingKeywords.Take(12))
-                                    {
-                                        <span class="keyword-chip">@keyword</span>
-                                    }
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="glass panel">
-                    <div class="panel-head">
-                        <div>
-                            <h2>ATS Verification Steps</h2>
-                            <p class="body-copy">These are the steps the system checks during review.</p>
-                        </div>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="info-card metric @(Model.ATSDetailedReport.TotalIssues == 0 ? "score-strong" : Model.ATSDetailedReport.TotalIssues <= 3 ? "score-watch" : "score-risk")">
-                            <strong>@Model.ATSDetailedReport.TotalIssues</strong>
-                            <div class="body-copy">Issues found</div>
-                        </div>
-                        <div class="info-card metric @ScoreTone(Model.ATSDetailedReport.ParseRate)">
-                            <strong>@Model.ATSDetailedReport.ParseRate%</strong>
-                            <div class="body-copy">Parse rate</div>
-                        </div>
-                    </div>
-
-                    <div class="step-grid" style="margin-top:1rem;">
-                        @foreach (var step in Model.ATSDetailedReport.Steps)
-                        {
-                            <div class="step-card">
-                                <div class="step-meta">
-                                    <div>
-                                        <div class="card-title">@step.Title</div>
-                                        <div class="subtle-note" style="margin-top:.25rem;">@step.Category</div>
-                                    </div>
-                                    <span class="@StepStatusTone(step.Status)">@step.Status</span>
-                                </div>
-                                <p class="body-copy">@step.Summary</p>
-                                @if (step.Details.Count > 0)
-                                {
-                                    <ul>
-                                        @foreach (var detail in step.Details)
-                                        {
-                                            <li>@detail</li>
-                                        }
-                                    </ul>
-                                }
-                            </div>
-                        }
-                    </div>
-
-                    @if (Model.ATSDetailedReport.RepeatedWords.Count > 0)
-                    {
-                        <div style="margin-top:1rem;">
-                            <div class="card-title">Repeated Words</div>
-                            <div class="repetition-list" style="margin-top:.8rem;">
-                                @foreach (var word in Model.ATSDetailedReport.RepeatedWords)
-                                {
-                                    <div class="repetition-item">
-                                        <strong>@word.Count times: @word.Word</strong>
-                                        @if (word.Alternatives.Count > 0)
-                                        {
-                                            <div class="chip-row">
-                                                @foreach (var alternative in word.Alternatives)
-                                                {
-                                                    <span class="keyword-chip">@alternative</span>
-                                                }
-                                            </div>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    }
-                </section>
-            }
-
-            @if (Model.JobAnalyzed && Model.JobKeywordAnalysis != null)
-            {
-                <section class="glass panel">
-                    <div class="panel-head">
-                        <div>
-                            <h2>Job Match Snapshot</h2>
-                            <p class="body-copy">Your resume compared with the job description.</p>
-                        </div>
-                    </div>
-
-                    <div class="stats-grid">
-                        <div class="info-card metric @ScoreTone(Model.JobKeywordAnalysis.MatchPercentage)">
-                            <strong>@Model.JobKeywordAnalysis.MatchPercentage%</strong>
-                            <div class="body-copy">Current job keyword match</div>
-                        </div>
-                        <div class="info-card metric">
-                            <strong>@Model.JobKeywordAnalysis.MissingKeywordsFromJob.Count</strong>
-                            <div class="body-copy">Missing job keywords</div>
-                        </div>
-                    </div>
-
-                    @if (Model.PlacementSuggestions.Count > 0)
-                    {
-                        <div class="suggestion-list" style="margin-top:1rem;">
-                            @foreach (var suggestion in Model.PlacementSuggestions)
+                <div class="grid-2 mt-4">
+                    <!-- Left: Original Weak Spots -->
+                    <div style="background:#f8fafc; padding:1.5rem; border-radius:12px; border:1px solid var(--border)">
+                        <h4 class="text-muted">Original Issues Fixed</h4>
+                        <ul style="font-size:0.9rem">
+                            @foreach(var issue in Model.ATSIssues.Take(3))
                             {
-                                <div class="suggestion-card">
-                                    <strong>@suggestion.Title</strong>
-                                    <span class="live-location">Best place: @suggestion.Location</span>
-                                    <p class="body-copy">@suggestion.Reason</p>
-                                    <div class="chip-row">
-                                        @foreach (var keyword in suggestion.Keywords)
-                                        {
-                                            <span class="keyword-chip">@keyword</span>
-                                        }
-                                    </div>
-                                    <div class="subtle-note">@suggestion.Impact</div>
-                                </div>
+                                <li class="mb-2">✔️ Resolved: @issue.Issue</li>
                             }
-                        </div>
+                        </ul>
+                    </div>
+
+                    <!-- Right: AI Improvements -->
+                    <div style="background:#f0fdf4; padding:1.5rem; border-radius:12px; border:1px solid #bbf7d0">
+                        <h4 style="color:#166534">AI Improvements</h4>
+                        <ul style="font-size:0.9rem; color:#166534">
+                            @foreach(var highlight in Model.TailoredResume?.CompanyFitHighlights ?? new List<string>())
+                            {
+                                <li class="mb-2">✅ @highlight</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <h4 class="mt-4">Matched Keywords</h4>
+                <div class="mb-4">
+                    @foreach(var kw in Model.TailoredResume?.ATSKeywords ?? new List<string>())
+                    {
+                        <span class="keyword-pill">@kw</span>
                     }
-                </section>
-            }
+                </div>
 
-            @if (Model.TailoredResume != null)
-            {
-                <section class="glass panel">
-                    <div class="panel-head">
-                        <div>
-                            <h2>3. Updated Resume Draft</h2>
-                            <p class="body-copy">This is the improved draft based on your uploaded resume and job details.</p>
-                        </div>
-                    </div>
+                <h4 class="mt-4">Optimized Resume Draft</h4>
+                <div class="preview-area" id="resumeContent" style="background:#fff; border:1px solid var(--border); padding:20px; white-space:pre-wrap; font-family:monospace;">@Model.TailoredResume?.FullResumeDraft</div>
 
-                    <div class="stats-grid">
-                        <div class="info-card metric @ScoreTone(Model.OptimizedATSScore)">
-                            <strong>@Model.OptimizedATSScore</strong>
-                            <div class="body-copy">Updated ATS score</div>
-                        </div>
-                        <div class="info-card metric">
-                            <strong>@Model.TailoredResume.ATSKeywords.Count</strong>
-                            <div class="body-copy">Matched keywords</div>
-                        </div>
-                    </div>
+                <div class="mt-4 d-flex gap-3" style="gap:1rem;">
+                    <button onclick="copyToClipboard()" class="btn-primary" style="background:#1e293b">Copy Text</button>
+                    <form method="post" style="display:inline">
+                        <button type="submit" name="action" value="exportDocx" class="btn-primary">Download .DOCX</button>
+                    </form>
+                    <a href="/" class="btn-primary" style="background:none; color:var(--text-muted); border:1px solid var(--border); text-decoration:none;">Start New Analysis</a>
+                </div>
+            </div>
 
-                    <div class="dual-grid" style="margin-top:1rem;">
-                        <div class="info-card">
-                            <div class="card-title">@Model.TailoredResume.Headline</div>
-                            <p class="body-copy">@Model.TailoredResume.ProfessionalSummary</p>
-                        </div>
-                        <div class="info-card">
-                            <div class="card-title">Highlights</div>
-                            <ul>
-                                @foreach (var item in Model.TailoredResume.CompanyFitHighlights)
-                                {
-                                    <li>@item</li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="dual-grid" style="margin-top:1rem;">
-                        <div class="info-card">
-                            <div class="card-title">Keywords</div>
-                            <div class="chip-row">
-                                @foreach (var keyword in Model.TailoredResume.ATSKeywords)
-                                {
-                                    <span class="keyword-chip">@keyword</span>
-                                }
-                            </div>
-                        </div>
-                        <div class="info-card">
-                            <div class="card-title">Updated Bullets</div>
-                            <ul>
-                                @foreach (var bullet in Model.TailoredResume.RewrittenBullets)
-                                {
-                                    <li>@bullet</li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="info-card" style="margin-top:1rem;">
-                        <div class="card-title">Resume Preview</div>
-                        <div class="preview-box" style="margin-top:1rem;">@Model.TailoredResume.FullResumeDraft</div>
-                        <div class="button-row">
-                            <form method="post">
-                                <button class="btn-main" type="submit" name="action" value="exportText">Export Plain Text</button>
-                            </form>
-                            <form method="post">
-                                <button class="btn-soft" type="submit" name="action" value="exportDocx">Export DOCX</button>
-                            </form>
-                        </div>
-                    </div>
-                </section>
-            }
-        </main>
-    </div>
+            <script>
+                function copyToClipboard() {
+                    const text = document.getElementById('resumeContent').innerText;
+                    navigator.clipboard.writeText(text);
+                    alert("Resume copied to clipboard!");
+                }
+            </script>
+            break;
+    }
 </div>
+<!-- Loading Overlay -->
+<div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+    <div class="spinner" style="width:50px; height:50px; border:5px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite;"></div>
+    <h3 style="margin-top:1.5rem; color:var(--primary);">AI is tailoring your resume...</h3>
+    <p class="text-muted">This usually takes 10-15 seconds.</p>
+</div>
+
+<style>
+    @@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<script>
+    // Show overlay when any "Run" or "Analyze" button is clicked
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', () => {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        });
+    });
+</script>

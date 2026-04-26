@@ -36,7 +36,7 @@ public class AIResumeAnalyzer
         _httpClient = httpClient;
         _logger = logger;
         _baseUrl = config["AI:OllamaUrl"] ?? "http://localhost:11434";
-        _model = config["AI:Model"] ?? "phi4";
+        _model = config["AI:Model"] ?? "minimax-m2.7:cloud";
     }
 
     public async Task<bool> IsAIAvailableAsync()

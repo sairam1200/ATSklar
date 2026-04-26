@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ATSklar")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7db16b4a7e4693c2d1541e9922e913d6c6fd7211")]
 [assembly: System.Reflection.AssemblyProductAttribute("ATSklar")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ATSklar")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
