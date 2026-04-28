@@ -76,7 +76,7 @@ public class ResumeModifierModel : PageModel
                 "analyze" => await HandleAnalyzeResumeAsync(),
                 "researchOptimize" => await HandleResearchOptimizeAsync(),
                 "exportText" => HandleExportText(),
-                "exportDocx" => HandleExportDocx(),
+                "exportasPdf" => HandleExportPdf(),
                 _ => Page()
             };
         }
@@ -176,10 +176,11 @@ public class ResumeModifierModel : PageModel
         return File(ATSExportManager.ExportAsPlainText(resumeText), "text/plain", $"resume-{DateTime.Now:yyyyMMdd}.txt");
     }
 
-    private IActionResult HandleExportDocx()
+    private IActionResult HandleExportPdf
+    ()
     {
         var resumeText = HttpContext.Session.GetString("OptimizedResume") ?? HttpContext.Session.GetString("CurrentResume") ?? "";
-        return File(ATSExportManager.ExportAsDocx(resumeText), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", $"resume-{DateTime.Now:yyyyMMdd}.docx");
+        return File(ATSExportManager.ExportAsPdf(resumeText), "application/pdf", $"resume-{DateTime.Now:yyyyMMdd}.pdf");
     }
 
     private async Task<string> ExtractTextFromFileAsync(IFormFile file)

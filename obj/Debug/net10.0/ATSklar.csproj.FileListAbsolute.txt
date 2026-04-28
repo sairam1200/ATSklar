@@ -116,3 +116,5 @@ E:\ATSklar\bin\Debug\net10.0\DocumentFormat.OpenXml.dll
 E:\ATSklar\bin\Debug\net10.0\DocumentFormat.OpenXml.Framework.dll
 E:\ATSklar\bin\Debug\net10.0\System.IO.Packaging.dll
 E:\ATSklar\obj\Debug\net10.0\ATSklar.sourcelink.json
+E:\ATSklar\bin\Debug\net10.0\BouncyCastle.Cryptography.dll
+E:\ATSklar\bin\Debug\net10.0\itext.bouncy-castle-adapter.dll

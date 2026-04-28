@@ -1,12 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "RipEyh4aMZ0=",
+  "dgSpecHash": "D1b1yXiGkLs=",
   "success": true,
   "projectFilePath": "E:\\ATSklar\\ATSklar.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\saira\\.nuget\\packages\\bouncycastle.cryptography\\2.4.0\\bouncycastle.cryptography.2.4.0.nupkg.sha512",
     "C:\\Users\\saira\\.nuget\\packages\\documentformat.openxml\\3.0.0\\documentformat.openxml.3.0.0.nupkg.sha512",
     "C:\\Users\\saira\\.nuget\\packages\\documentformat.openxml.framework\\3.0.0\\documentformat.openxml.framework.3.0.0.nupkg.sha512",
     "C:\\Users\\saira\\.nuget\\packages\\itext\\9.0.0\\itext.9.0.0.nupkg.sha512",
+    "C:\\Users\\saira\\.nuget\\packages\\itext.bouncy-castle-adapter\\9.0.0\\itext.bouncy-castle-adapter.9.0.0.nupkg.sha512",
     "C:\\Users\\saira\\.nuget\\packages\\itext.commons\\9.0.0\\itext.commons.9.0.0.nupkg.sha512",
     "C:\\Users\\saira\\.nuget\\packages\\itext7\\9.0.0\\itext7.9.0.0.nupkg.sha512",
     "C:\\Users\\saira\\.nuget\\packages\\microsoft.dotnet.platformabstractions\\1.1.0\\microsoft.dotnet.platformabstractions.1.1.0.nupkg.sha512",

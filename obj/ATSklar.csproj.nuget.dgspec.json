@@ -48,6 +48,10 @@
               "target": "Package",
               "version": "[2.21.1, )"
             },
+            "itext.bouncy-castle-adapter": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "itext7": {
               "target": "Package",
               "version": "[8.1.6, )"
